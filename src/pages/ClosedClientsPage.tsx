@@ -19,9 +19,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Input } from '@/components/ui/input';
-import { Search, Building, User, Phone, MapPin, Calendar, DollarSign, MoreHorizontal } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Search, Building, User, Phone, MapPin, Calendar, DollarSign, MoreHorizontal, Clock, MonitorPlay } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +52,10 @@ const ClosedClientsPage = () => {
   const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
   const [editingClient, setEditingClient] = useState<ClosedClient | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogType, setEditDialogType] = useState<'value' | 'progress'>('value');
   const [editedValue, setEditedValue] = useState('');
+  const [editedTimeline, setEditedTimeline] = useState('');
+  const [editedProgress, setEditedProgress] = useState<number>(0);
 
   // Filter clients
   const filteredClients = closedClients.filter(client => 
@@ -63,17 +68,32 @@ const ClosedClientsPage = () => {
   // Calculate total revenue
   const totalRevenue = filteredClients.reduce((sum, client) => sum + client.value, 0);
 
-  const handleEditClient = (client: ClosedClient) => {
+  const handleEditClient = (client: ClosedClient, type: 'value' | 'progress') => {
     setEditingClient(client);
-    setEditedValue(client.value.toString());
+    setEditDialogType(type);
+    
+    if (type === 'value') {
+      setEditedValue(client.value.toString());
+    } else {
+      setEditedTimeline(client.projectTimeline?.toString() || '4');
+      setEditedProgress(client.progressPercentage || 0);
+    }
+    
     setDialogOpen(true);
   };
 
   const handleUpdateClient = () => {
     if (editingClient) {
-      updateClosedClient(editingClient.id, {
-        value: Number(editedValue)
-      });
+      if (editDialogType === 'value') {
+        updateClosedClient(editingClient.id, {
+          value: Number(editedValue)
+        });
+      } else {
+        updateClosedClient(editingClient.id, {
+          projectTimeline: Number(editedTimeline),
+          progressPercentage: editedProgress
+        });
+      }
       setEditingClient(null);
       setDialogOpen(false);
     }
@@ -188,8 +208,11 @@ const ClosedClientsPage = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEditClient(client)}>
+                          <DropdownMenuItem onClick={() => handleEditClient(client, 'value')}>
                             Editar Valor
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditClient(client, 'progress')}>
+                            Atualizar Progresso
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleDeleteClient(client.id)}
@@ -237,6 +260,35 @@ const ClosedClientsPage = () => {
                       </div>
                     </div>
 
+                    <div className="mt-4 pt-3 border-t">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center">
+                          <Clock className="h-4 w-4 mr-2 text-brand-blue" />
+                          <span className="text-gray-600 text-sm">
+                            Tempo de desenvolvimento: {client.projectTimeline || 4} semanas
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 text-sm">Progresso:</span>
+                          <span className="text-sm font-medium">
+                            {client.progressPercentage || 0}%
+                          </span>
+                        </div>
+                        <Progress 
+                          value={client.progressPercentage || 0} 
+                          className="h-2"
+                          indicatorClassName={
+                            (client.progressPercentage || 0) >= 100 
+                              ? "bg-green-500" 
+                              : "bg-brand-blue"
+                          }
+                        />
+                      </div>
+                    </div>
+
                     {client.notes && (
                       <div className="mt-4 pt-3 border-t">
                         <p className="text-sm text-gray-600 line-clamp-3">{client.notes}</p>
@@ -281,25 +333,60 @@ const ClosedClientsPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Value Dialog */}
+      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Editar Valor</DialogTitle>
+            <DialogTitle>
+              {editDialogType === 'value' ? 'Editar Valor' : 'Atualizar Progresso'}
+            </DialogTitle>
           </DialogHeader>
           
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                Novo Valor (R$)
-              </label>
-              <Input
-                type="number"
-                value={editedValue}
-                onChange={(e) => setEditedValue(e.target.value)}
-                placeholder="Valor do projeto"
-              />
-            </div>
+            {editDialogType === 'value' ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Novo Valor (R$)
+                </label>
+                <Input
+                  type="number"
+                  value={editedValue}
+                  onChange={(e) => setEditedValue(e.target.value)}
+                  placeholder="Valor do projeto"
+                />
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Tempo de Desenvolvimento (semanas)
+                  </label>
+                  <Input
+                    type="number"
+                    value={editedTimeline}
+                    onChange={(e) => setEditedTimeline(e.target.value)}
+                    placeholder="Tempo em semanas"
+                    min="1"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium">
+                      Progresso do Projeto
+                    </label>
+                    <span className="text-sm font-medium">
+                      {editedProgress}%
+                    </span>
+                  </div>
+                  <Slider
+                    value={[editedProgress]}
+                    onValueChange={(values) => setEditedProgress(values[0])}
+                    max={100}
+                    step={5}
+                  />
+                </div>
+              </>
+            )}
           </div>
           
           <div className="flex justify-end space-x-2">

@@ -17,6 +17,8 @@ export interface Client {
 export interface ClosedClient extends Client {
   siteTypeId: string;
   value: number;
+  projectTimeline?: number; // Timeline in weeks
+  progressPercentage?: number; // Progress percentage (0-100)
 }
 
 export interface SiteType {

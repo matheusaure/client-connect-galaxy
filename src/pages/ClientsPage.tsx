@@ -20,7 +20,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -46,6 +45,7 @@ const ClientsPage = () => {
   const [convertClientId, setConvertClientId] = useState<string | null>(null);
   const [siteTypeId, setSiteTypeId] = useState<string>('');
   const [value, setValue] = useState<string>('');
+  const [projectTimeline, setProjectTimeline] = useState<string>('4'); // Default 4 weeks
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Get the client being converted
@@ -102,6 +102,7 @@ const ClientsPage = () => {
     if (siteTypes.length > 0) {
       setSiteTypeId(siteTypes[0].id);
       setValue(siteTypes[0].baseValue.toString());
+      setProjectTimeline('4'); // Default to 4 weeks
     }
   };
 
@@ -113,6 +114,8 @@ const ClientsPage = () => {
         status: 'fechado',
         siteTypeId,
         value: Number(value),
+        projectTimeline: Number(projectTimeline),
+        progressPercentage: 0, // Start with 0% progress
       });
 
       // Remove from regular clients
@@ -292,13 +295,26 @@ const ClientsPage = () => {
                 placeholder="Valor do projeto"
               />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">
+                Tempo de Desenvolvimento (semanas)
+              </label>
+              <Input
+                type="number"
+                value={projectTimeline}
+                onChange={(e) => setProjectTimeline(e.target.value)}
+                placeholder="Tempo em semanas"
+                min="1"
+              />
+            </div>
           </div>
           
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction 
               onClick={confirmConvertClient}
-              disabled={!siteTypeId || !value}
+              disabled={!siteTypeId || !value || !projectTimeline}
             >
               Confirmar
             </AlertDialogAction>

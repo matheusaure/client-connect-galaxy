@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Client, ClosedClient, SiteType, ClientStatus } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
@@ -75,7 +74,6 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     return savedSiteTypes ? JSON.parse(savedSiteTypes) : initialSiteTypes;
   });
 
-  // Save to localStorage whenever state changes
   useEffect(() => {
     localStorage.setItem('clients', JSON.stringify(clients));
   }, [clients]);
@@ -124,6 +122,8 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
       id: uuidv4(),
       createdAt: now,
       updatedAt: now,
+      projectTimeline: client.projectTimeline || 4,
+      progressPercentage: client.progressPercentage || 0,
     };
     
     setClosedClients((prev) => [...prev, newClosedClient]);
@@ -171,7 +171,6 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const deleteSiteType = (id: string) => {
-    // Check if any closed client is using this site type
     const isSiteTypeInUse = closedClients.some(client => client.siteTypeId === id);
     
     if (isSiteTypeInUse) {
