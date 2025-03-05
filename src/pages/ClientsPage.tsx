@@ -189,7 +189,7 @@ const ClientsPage = () => {
           <TabsTrigger value="fechado">Fechado</TabsTrigger>
         </TabsList>
         
-        {/* All statuses are shown in the same content, filtered by the status state */}
+        {/* We need to update all tabs to display content properly */}
         <TabsContent value="all" className="mt-6">
           {filteredClients.length === 0 ? (
             <div className="text-center py-10">
@@ -212,17 +212,97 @@ const ClientsPage = () => {
             </div>
           )}
         </TabsContent>
-        <TabsContent value="em_andamento">
-          {/* Content rendered by the "all" tab */}
+        
+        <TabsContent value="em_andamento" className="mt-6">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Nenhum cliente em andamento encontrado</h3>
+              <p className="text-muted-foreground mt-1">
+                Adicione novos clientes ou ajuste seus filtros de busca
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredClients.map((client) => (
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={() => handleEditClient(client)}
+                  onDelete={() => handleDeleteClient(client.id)}
+                  onConvert={() => handleConvertClient(client.id)}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
-        <TabsContent value="em_negociacao">
-          {/* Content rendered by the "all" tab */}
+        
+        <TabsContent value="em_negociacao" className="mt-6">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Nenhum cliente em negociação encontrado</h3>
+              <p className="text-muted-foreground mt-1">
+                Adicione novos clientes ou ajuste seus filtros de busca
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredClients.map((client) => (
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={() => handleEditClient(client)}
+                  onDelete={() => handleDeleteClient(client.id)}
+                  onConvert={() => handleConvertClient(client.id)}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
-        <TabsContent value="nao_fechou">
-          {/* Content rendered by the "all" tab */}
+        
+        <TabsContent value="nao_fechou" className="mt-6">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Nenhum cliente que não fechou encontrado</h3>
+              <p className="text-muted-foreground mt-1">
+                Adicione novos clientes ou ajuste seus filtros de busca
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredClients.map((client) => (
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={() => handleEditClient(client)}
+                  onDelete={() => handleDeleteClient(client.id)}
+                  onConvert={() => handleConvertClient(client.id)}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
-        <TabsContent value="fechado">
-          {/* Content rendered by the "all" tab */}
+        
+        <TabsContent value="fechado" className="mt-6">
+          {filteredClients.length === 0 ? (
+            <div className="text-center py-10">
+              <h3 className="text-lg font-medium">Nenhum cliente fechado encontrado</h3>
+              <p className="text-muted-foreground mt-1">
+                Adicione novos clientes com status "Fechado" ou converta clientes existentes
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredClients.map((client) => (
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  onEdit={() => handleEditClient(client)}
+                  onDelete={() => handleDeleteClient(client.id)}
+                  onConvert={() => handleConvertClient(client.id)}
+                />
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
 

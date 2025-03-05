@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useClientContext } from '@/context/ClientContext';
 import { ClosedClient } from '@/types';
@@ -297,7 +298,122 @@ const ClosedClientsPage = () => {
         </TabsContent>
         
         {siteTypes.map((type) => (
-          <TabsContent key={type.id} value={type.id}>
+          <TabsContent key={type.id} value={type.id} className="mt-6">
+            {filteredClients.length === 0 ? (
+              <div className="text-center py-10">
+                <h3 className="text-lg font-medium">Nenhum cliente com este tipo de site</h3>
+                <p className="text-muted-foreground mt-1">
+                  Feche projetos com este tipo de site para vê-los aqui
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredClients.map((client) => (
+                  <Card key={client.id} className="h-full hover:shadow-md transition-shadow duration-300 glass-card border border-gray-100">
+                    <div className="h-2 w-full bg-green-500" />
+                    
+                    <CardContent className="p-5">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <Badge className="mb-2 bg-brand-teal text-white">
+                            {getSiteTypeName(client.siteTypeId)}
+                          </Badge>
+                          <h3 className="font-semibold text-lg mb-1">{client.businessName}</h3>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleEditClient(client, 'value')}>
+                              Editar Valor
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditClient(client, 'progress')}>
+                              Atualizar Progresso
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteClient(client.id)}
+                              className="text-red-500 focus:text-red-500"
+                            >
+                              Excluir
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="space-y-2 text-sm">
+                        {client.contactName && (
+                          <div className="flex items-center text-gray-600">
+                            <User className="h-4 w-4 mr-2 text-brand-blue" />
+                            <span>{client.contactName}</span>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center text-gray-600">
+                          <Phone className="h-4 w-4 mr-2 text-brand-blue" />
+                          <span>{client.phone}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-gray-600">
+                          <MapPin className="h-4 w-4 mr-2 text-brand-blue" />
+                          <span>{client.city}</span>
+                        </div>
+                        
+                        <div className="flex items-center text-gray-600">
+                          <Calendar className="h-4 w-4 mr-2 text-brand-blue" />
+                          <span>Contato: {format(new Date(client.contactDate), 'dd/MM/yyyy')}</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600 text-sm">Valor:</span>
+                          <span className="font-bold text-brand-blue">
+                            {client.value.toLocaleString('pt-BR', { 
+                              style: 'currency', 
+                              currency: 'BRL' 
+                            })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center">
+                            <Clock className="h-4 w-4 mr-2 text-brand-blue" />
+                            <span className="text-gray-600 text-sm">
+                              Tempo de desenvolvimento: {client.projectTimeline || 4} semanas
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-600 text-sm">Progresso:</span>
+                            <span className="text-sm font-medium">
+                              {client.progressPercentage || 0}%
+                            </span>
+                          </div>
+                          <Progress 
+                            value={client.progressPercentage || 0} 
+                            className="h-2 bg-gray-100"
+                          />
+                        </div>
+                      </div>
+
+                      {client.notes && (
+                        <div className="mt-4 pt-3 border-t">
+                          <p className="text-sm text-gray-600 line-clamp-3">{client.notes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         ))}
       </Tabs>
