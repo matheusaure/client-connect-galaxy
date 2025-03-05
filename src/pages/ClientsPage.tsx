@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useClientContext } from '@/context/ClientContext';
 import ClientForm from '@/components/ClientForm';
@@ -48,10 +47,8 @@ const ClientsPage = () => {
   const [projectTimeline, setProjectTimeline] = useState<string>('4'); // Default 4 weeks
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Get the client being converted
   const clientToConvert = convertClientId ? clients.find(c => c.id === convertClientId) : null;
 
-  // Filter and sort clients
   const filteredClients = clients
     .filter(client => 
       (status === 'all' || client.status === status) &&
@@ -67,14 +64,35 @@ const ClientsPage = () => {
       }
     });
 
-  const handleAddClient = (data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
-    addClient(data);
+  const handleAddClient = (data: any) => {
+    if (data.status === 'fechado' && data.siteTypeId) {
+      addClosedClient({
+        ...data,
+        value: Number(data.value),
+        projectTimeline: Number(data.projectTimeline),
+        progressPercentage: 0, // Start with 0% progress
+      });
+    } else {
+      const { siteTypeId, value, projectTimeline, ...clientData } = data;
+      addClient(clientData);
+    }
     setDialogOpen(false);
   };
 
-  const handleUpdateClient = (data: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const handleUpdateClient = (data: any) => {
     if (editingClient) {
-      updateClient(editingClient.id, data);
+      if (data.status === 'fechado' && data.siteTypeId) {
+        addClosedClient({
+          ...data,
+          value: Number(data.value),
+          projectTimeline: Number(data.projectTimeline),
+          progressPercentage: 0, // Start with 0% progress
+        });
+        deleteClient(editingClient.id);
+      } else {
+        const { siteTypeId, value, projectTimeline, ...clientData } = data;
+        updateClient(editingClient.id, clientData);
+      }
       setEditingClient(null);
       setDialogOpen(false);
     }
@@ -98,7 +116,6 @@ const ClientsPage = () => {
 
   const handleConvertClient = (id: string) => {
     setConvertClientId(id);
-    // Find first site type to preset in form
     if (siteTypes.length > 0) {
       setSiteTypeId(siteTypes[0].id);
       setValue(siteTypes[0].baseValue.toString());
@@ -108,7 +125,6 @@ const ClientsPage = () => {
 
   const confirmConvertClient = () => {
     if (convertClientId && clientToConvert && siteTypeId) {
-      // Add to closed clients
       addClosedClient({
         ...clientToConvert,
         status: 'fechado',
@@ -117,8 +133,6 @@ const ClientsPage = () => {
         projectTimeline: Number(projectTimeline),
         progressPercentage: 0, // Start with 0% progress
       });
-
-      // Remove from regular clients
       deleteClient(convertClientId);
       setConvertClientId(null);
     }
@@ -189,7 +203,6 @@ const ClientsPage = () => {
           <TabsTrigger value="fechado">Fechado</TabsTrigger>
         </TabsList>
         
-        {/* We need to update all tabs to display content properly */}
         <TabsContent value="all" className="mt-6">
           {filteredClients.length === 0 ? (
             <div className="text-center py-10">
@@ -306,7 +319,6 @@ const ClientsPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={!!deleteClientId} onOpenChange={(open) => !open && setDeleteClientId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -327,7 +339,6 @@ const ClientsPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Convert client dialog */}
       <AlertDialog open={!!convertClientId} onOpenChange={(open) => !open && setConvertClientId(null)}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
@@ -348,7 +359,6 @@ const ClientsPage = () => {
                 value={siteTypeId}
                 onChange={(e) => {
                   setSiteTypeId(e.target.value);
-                  // Automatically set the value based on selected site type
                   const selectedType = siteTypes.find(type => type.id === e.target.value);
                   if (selectedType) {
                     setValue(selectedType.baseValue.toString());

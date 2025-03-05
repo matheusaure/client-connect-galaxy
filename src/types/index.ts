@@ -31,3 +31,9 @@ export interface SiteType {
 }
 
 export type NewSiteType = Omit<SiteType, 'id' | 'createdAt' | 'updatedAt'>;
+
+export type ClientFormData = Omit<Client, 'id' | 'createdAt' | 'updatedAt'> & {
+  siteTypeId?: string;
+  value?: string;
+  projectTimeline?: string;
+};
