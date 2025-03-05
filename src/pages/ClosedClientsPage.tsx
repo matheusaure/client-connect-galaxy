@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useClientContext } from '@/context/ClientContext';
 import { ClosedClient } from '@/types';
@@ -57,7 +56,6 @@ const ClosedClientsPage = () => {
   const [editedTimeline, setEditedTimeline] = useState('');
   const [editedProgress, setEditedProgress] = useState<number>(0);
 
-  // Filter clients
   const filteredClients = closedClients.filter(client => 
     (selectedSiteType === 'all' || client.siteTypeId === selectedSiteType) &&
     (client.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -65,7 +63,6 @@ const ClosedClientsPage = () => {
     client.city.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  // Calculate total revenue
   const totalRevenue = filteredClients.reduce((sum, client) => sum + client.value, 0);
 
   const handleEditClient = (client: ClosedClient, type: 'value' | 'progress') => {
@@ -110,7 +107,6 @@ const ClosedClientsPage = () => {
     }
   };
 
-  // Get the site type name by ID
   const getSiteTypeName = (id: string) => {
     const siteType = siteTypes.find(type => type.id === id);
     return siteType ? siteType.name : 'Desconhecido';
@@ -279,11 +275,10 @@ const ClosedClientsPage = () => {
                         </div>
                         <Progress 
                           value={client.progressPercentage || 0} 
-                          className="h-2"
-                          indicatorClassName={
+                          className={
                             (client.progressPercentage || 0) >= 100 
-                              ? "bg-green-500" 
-                              : "bg-brand-blue"
+                              ? "h-2 bg-gray-100" 
+                              : "h-2 bg-gray-100"
                           }
                         />
                       </div>
@@ -301,15 +296,12 @@ const ClosedClientsPage = () => {
           )}
         </TabsContent>
         
-        {/* All other tabs reuse the same content and are filtered by state */}
         {siteTypes.map((type) => (
           <TabsContent key={type.id} value={type.id}>
-            {/* Content rendered by the "all" tab */}
           </TabsContent>
         ))}
       </Tabs>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog 
         open={!!deleteClientId} 
         onOpenChange={(open) => !open && setDeleteClientId(null)}
@@ -333,7 +325,6 @@ const ClosedClientsPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>

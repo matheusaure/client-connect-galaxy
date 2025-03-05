@@ -29,3 +29,5 @@ export interface SiteType {
   createdAt: string;
   updatedAt: string;
 }
+
+export type NewSiteType = Omit<SiteType, 'id' | 'createdAt' | 'updatedAt'>;
