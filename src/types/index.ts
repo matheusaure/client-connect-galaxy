@@ -9,13 +9,13 @@ export interface Client {
   city: string;
   contactDate: string;
   status: ClientStatus;
+  siteTypeId?: string; // Added siteTypeId as an optional field for all clients
   notes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ClosedClient extends Client {
-  siteTypeId: string;
   value: number;
   projectTimeline?: number; // Timeline in weeks
   progressPercentage?: number; // Progress percentage (0-100)
@@ -33,7 +33,6 @@ export interface SiteType {
 export type NewSiteType = Omit<SiteType, 'id' | 'createdAt' | 'updatedAt'>;
 
 export type ClientFormData = Omit<Client, 'id' | 'createdAt' | 'updatedAt'> & {
-  siteTypeId?: string;
   value?: string;
   projectTimeline?: string;
 };

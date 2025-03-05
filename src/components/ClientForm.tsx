@@ -38,8 +38,8 @@ const formSchema = z.object({
   city: z.string().min(1, { message: 'Cidade é obrigatória' }),
   contactDate: z.string().min(1, { message: 'Data de contato é obrigatória' }),
   status: z.enum(['em_andamento', 'em_negociacao', 'nao_fechou', 'fechado']),
-  notes: z.string().optional(),
   siteTypeId: z.string().optional(),
+  notes: z.string().optional(),
   value: z.string().optional(),
   projectTimeline: z.string().optional(),
 });
@@ -61,6 +61,7 @@ const ClientForm = ({
     city: '',
     contactDate: new Date().toISOString().split('T')[0],
     status: 'em_negociacao' as ClientStatus,
+    siteTypeId: '',
     notes: '',
   },
   buttonText = 'Adicionar Cliente',
@@ -90,10 +91,12 @@ const ClientForm = ({
 
   const handleSiteTypeChange = (siteTypeId: string) => {
     form.setValue('siteTypeId', siteTypeId);
-    // Update value based on selected site type
-    const selectedType = siteTypes.find(type => type.id === siteTypeId);
-    if (selectedType) {
-      form.setValue('value', selectedType.baseValue.toString());
+    // Update value based on selected site type if status is closed
+    if (isClosed) {
+      const selectedType = siteTypes.find(type => type.id === siteTypeId);
+      if (selectedType) {
+        form.setValue('value', selectedType.baseValue.toString());
+      }
     }
   };
 
@@ -199,40 +202,40 @@ const ClientForm = ({
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="siteTypeId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Site</FormLabel>
+                <Select
+                  onValueChange={(value) => handleSiteTypeChange(value)}
+                  defaultValue={field.value}
+                  value={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de site" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {siteTypes.map((type) => (
+                      <SelectItem key={type.id} value={type.id}>
+                        {type.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
 
         {/* Conditional fields for 'fechado' status */}
         {isClosed && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-muted/50 p-4 rounded-md">
-            <FormField
-              control={form.control}
-              name="siteTypeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Tipo de Site*</FormLabel>
-                  <Select
-                    onValueChange={(value) => handleSiteTypeChange(value)}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o tipo de site" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {siteTypes.map((type) => (
-                        <SelectItem key={type.id} value={type.id}>
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="value"
