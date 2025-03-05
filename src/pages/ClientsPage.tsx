@@ -73,7 +73,7 @@ const ClientsPage = () => {
         progressPercentage: 0, // Start with 0% progress
       });
     } else {
-      const { siteTypeId, value, projectTimeline, ...clientData } = data;
+      const { value, projectTimeline, ...clientData } = data;
       addClient(clientData);
     }
     setDialogOpen(false);
@@ -90,7 +90,7 @@ const ClientsPage = () => {
         });
         deleteClient(editingClient.id);
       } else {
-        const { siteTypeId, value, projectTimeline, ...clientData } = data;
+        const { value, projectTimeline, ...clientData } = data;
         updateClient(editingClient.id, clientData);
       }
       setEditingClient(null);
