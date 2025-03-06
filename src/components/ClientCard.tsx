@@ -9,7 +9,8 @@ import {
   MapPin, 
   Calendar, 
   ClipboardList,
-  MoreHorizontal
+  MoreHorizontal,
+  Code
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useClientContext } from '@/context/ClientContext';
 
 interface ClientCardProps {
   client: Client;
@@ -34,6 +36,8 @@ const ClientCard: React.FC<ClientCardProps> = ({
   onDelete,
   onConvert 
 }) => {
+  const { siteTypes } = useClientContext();
+  
   const statusColor = {
     em_andamento: 'bg-blue-100 text-blue-800 border-blue-200',
     em_negociacao: 'bg-amber-100 text-amber-800 border-amber-200',
@@ -52,6 +56,11 @@ const ClientCard: React.FC<ClientCardProps> = ({
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR');
   };
+
+  // Find the site type name if the client has a siteTypeId
+  const siteTypeName = client.siteTypeId 
+    ? siteTypes.find(type => type.id === client.siteTypeId)?.name 
+    : null;
 
   return (
     <Card className="h-full hover:shadow-md transition-shadow duration-300 overflow-hidden glass-card border border-gray-100">
@@ -122,6 +131,13 @@ const ClientCard: React.FC<ClientCardProps> = ({
             <Calendar className="h-4 w-4 mr-2 text-brand-blue" />
             <span>Contato: {formatDate(client.contactDate)}</span>
           </div>
+
+          {siteTypeName && (
+            <div className="flex items-center text-gray-600">
+              <Code className="h-4 w-4 mr-2 text-brand-blue" />
+              <span>Tipo de Site: {siteTypeName}</span>
+            </div>
+          )}
         </div>
 
         {client.notes && (
