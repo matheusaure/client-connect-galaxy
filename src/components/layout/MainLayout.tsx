@@ -41,7 +41,7 @@ export default function MainLayout() {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out bg-white/80 backdrop-blur-lg border-r shadow-lg lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 w-64 transform transition-transform duration-300 ease-in-out bg-black/90 backdrop-blur-lg border-r border-white/10 shadow-lg lg:translate-x-0",
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -58,8 +58,8 @@ export default function MainLayout() {
                 className={cn(
                   "flex items-center px-4 py-3 text-sm font-medium rounded-lg group transition-all duration-200",
                   location.pathname === item.href 
-                    ? "bg-primary text-white" 
-                    : "text-gray-700 hover:bg-brand-light-blue/10"
+                    ? "bg-brand-blue text-white" 
+                    : "text-gray-300 hover:bg-white/10"
                 )}
               >
                 <item.icon 
@@ -74,8 +74,8 @@ export default function MainLayout() {
           </nav>
           
           <div className="py-6">
-            <div className="px-4 py-3 bg-brand-light-blue/10 rounded-lg">
-              <p className="text-xs text-gray-500">
+            <div className="px-4 py-3 bg-white/5 rounded-lg">
+              <p className="text-xs text-gray-400">
                 Gestão de clientes simplificada
               </p>
             </div>
