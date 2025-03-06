@@ -96,17 +96,56 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     
     setClients((prev) => [...prev, newClient]);
+
+    if (client.status === 'fechado' && client.siteTypeId) {
+      const closedClient: ClosedClient = {
+        ...newClient,
+        value: Number(client.value) || 0,
+        projectTimeline: Number(client.projectTimeline) || 4,
+        progressPercentage: 0,
+      };
+      setClosedClients((prev) => [...prev, closedClient]);
+    }
+    
     toast.success("Cliente adicionado com sucesso");
   };
 
   const updateClient = (id: string, clientData: Partial<Client>) => {
-    setClients((prev) => 
-      prev.map((client) => 
-        client.id === id 
-          ? { ...client, ...clientData, updatedAt: new Date().toISOString() }
-          : client
-      )
-    );
+    setClients((prev) => {
+      const updatedClients = prev.map((client) => {
+        if (client.id === id) {
+          const updatedClient = { 
+            ...client, 
+            ...clientData, 
+            updatedAt: new Date().toISOString() 
+          };
+
+          if (clientData.status === 'fechado' && updatedClient.siteTypeId) {
+            const closedClient: ClosedClient = {
+              ...updatedClient,
+              value: Number(clientData.value) || 0,
+              projectTimeline: Number(clientData.projectTimeline) || 4,
+              progressPercentage: 0,
+            };
+            setClosedClients(prev => {
+              const exists = prev.some(c => c.id === id);
+              if (exists) {
+                return prev.map(c => c.id === id ? closedClient : c);
+              }
+              return [...prev, closedClient];
+            });
+          } else if (clientData.status && clientData.status !== 'fechado') {
+            setClosedClients(prev => prev.filter(c => c.id !== id));
+          }
+
+          return updatedClient;
+        }
+        return client;
+      });
+
+      return updatedClients;
+    });
+    
     toast.success("Cliente atualizado com sucesso");
   };
 
