@@ -7,8 +7,8 @@ interface ClientContextType {
   clients: Client[];
   closedClients: ClosedClient[];
   siteTypes: SiteType[];
-  addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateClient: (id: string, client: Partial<Client>) => void;
+  addClient: (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> & { value?: string, projectTimeline?: string }) => void;
+  updateClient: (id: string, client: Partial<Client> & { value?: string, projectTimeline?: string }) => void;
   deleteClient: (id: string) => void;
   addClosedClient: (client: Omit<ClosedClient, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateClosedClient: (id: string, client: Partial<ClosedClient>) => void;
@@ -86,10 +86,12 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.setItem('siteTypes', JSON.stringify(siteTypes));
   }, [siteTypes]);
 
-  const addClient = (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addClient = (client: Omit<Client, 'id' | 'createdAt' | 'updatedAt'> & { value?: string, projectTimeline?: string }) => {
     const now = new Date().toISOString();
+    const { value, projectTimeline, ...clientData } = client;
+    
     const newClient: Client = {
-      ...client,
+      ...clientData,
       id: uuidv4(),
       createdAt: now,
       updatedAt: now,
@@ -100,8 +102,8 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     if (client.status === 'fechado' && client.siteTypeId) {
       const closedClient: ClosedClient = {
         ...newClient,
-        value: Number(client.value) || 0,
-        projectTimeline: Number(client.projectTimeline) || 4,
+        value: Number(value) || 0,
+        projectTimeline: Number(projectTimeline) || 4,
         progressPercentage: 0,
       };
       setClosedClients((prev) => [...prev, closedClient]);
@@ -110,21 +112,23 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     toast.success("Cliente adicionado com sucesso");
   };
 
-  const updateClient = (id: string, clientData: Partial<Client>) => {
+  const updateClient = (id: string, clientData: Partial<Client> & { value?: string, projectTimeline?: string }) => {
     setClients((prev) => {
       const updatedClients = prev.map((client) => {
         if (client.id === id) {
+          const { value, projectTimeline, ...clientUpdateData } = clientData;
+          
           const updatedClient = { 
             ...client, 
-            ...clientData, 
+            ...clientUpdateData, 
             updatedAt: new Date().toISOString() 
           };
 
           if (clientData.status === 'fechado' && updatedClient.siteTypeId) {
             const closedClient: ClosedClient = {
               ...updatedClient,
-              value: Number(clientData.value) || 0,
-              projectTimeline: Number(clientData.projectTimeline) || 4,
+              value: Number(value) || 0,
+              projectTimeline: Number(projectTimeline) || 4,
               progressPercentage: 0,
             };
             setClosedClients(prev => {
@@ -165,6 +169,21 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
       progressPercentage: client.progressPercentage || 0,
     };
     
+    const regularClient: Client = {
+      ...client,
+      id: newClosedClient.id,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    setClients((prev) => {
+      const exists = prev.some(c => c.id === regularClient.id);
+      if (!exists) {
+        return [...prev, regularClient];
+      }
+      return prev;
+    });
+    
     setClosedClients((prev) => [...prev, newClosedClient]);
     toast.success("Cliente fechado adicionado com sucesso");
   };
@@ -177,11 +196,30 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
           : client
       )
     );
+    
+    setClients((prev) => 
+      prev.map((client) => {
+        if (client.id === id) {
+          const { value, projectTimeline, progressPercentage, ...regularClientData } = clientData;
+          return { ...client, ...regularClientData, updatedAt: new Date().toISOString() };
+        }
+        return client;
+      })
+    );
+    
     toast.success("Cliente fechado atualizado com sucesso");
   };
 
   const deleteClosedClient = (id: string) => {
     setClosedClients((prev) => prev.filter((client) => client.id !== id));
+    setClients((prev) => 
+      prev.map((client) => {
+        if (client.id === id) {
+          return { ...client, status: 'nao_fechou' as ClientStatus, updatedAt: new Date().toISOString() };
+        }
+        return client;
+      })
+    );
     toast.success("Cliente fechado removido com sucesso");
   };
 

@@ -66,33 +66,16 @@ const ClientsPage = () => {
 
   const handleAddClient = (data: any) => {
     if (data.status === 'fechado' && data.siteTypeId) {
-      addClosedClient({
-        ...data,
-        value: Number(data.value),
-        projectTimeline: Number(data.projectTimeline),
-        progressPercentage: 0, // Start with 0% progress
-      });
+      addClient(data);
     } else {
-      const { value, projectTimeline, ...clientData } = data;
-      addClient(clientData);
+      addClient(data);
     }
     setDialogOpen(false);
   };
 
   const handleUpdateClient = (data: any) => {
     if (editingClient) {
-      if (data.status === 'fechado' && data.siteTypeId) {
-        addClosedClient({
-          ...data,
-          value: Number(data.value),
-          projectTimeline: Number(data.projectTimeline),
-          progressPercentage: 0, // Start with 0% progress
-        });
-        deleteClient(editingClient.id);
-      } else {
-        const { value, projectTimeline, ...clientData } = data;
-        updateClient(editingClient.id, clientData);
-      }
+      updateClient(editingClient.id, data);
       setEditingClient(null);
       setDialogOpen(false);
     }
