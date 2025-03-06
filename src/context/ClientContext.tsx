@@ -90,9 +90,16 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     const now = new Date().toISOString();
     const { value, projectTimeline, ...clientData } = client;
     
+    let siteTypeName;
+    if (client.siteTypeId) {
+      const siteType = siteTypes.find(type => type.id === client.siteTypeId);
+      siteTypeName = siteType ? siteType.name : '';
+    }
+    
     const newClient: Client = {
       ...clientData,
       id: uuidv4(),
+      siteTypeName,
       createdAt: now,
       updatedAt: now,
     };
@@ -118,9 +125,16 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
         if (client.id === id) {
           const { value, projectTimeline, ...clientUpdateData } = clientData;
           
+          let siteTypeName = client.siteTypeName;
+          if (clientUpdateData.siteTypeId) {
+            const siteType = siteTypes.find(type => type.id === clientUpdateData.siteTypeId);
+            siteTypeName = siteType ? siteType.name : siteTypeName;
+          }
+          
           const updatedClient = { 
             ...client, 
-            ...clientUpdateData, 
+            ...clientUpdateData,
+            siteTypeName,
             updatedAt: new Date().toISOString() 
           };
 
@@ -201,7 +215,19 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
       prev.map((client) => {
         if (client.id === id) {
           const { value, projectTimeline, progressPercentage, ...regularClientData } = clientData;
-          return { ...client, ...regularClientData, updatedAt: new Date().toISOString() };
+          
+          let siteTypeName = client.siteTypeName;
+          if (regularClientData.siteTypeId) {
+            const siteType = siteTypes.find(type => type.id === regularClientData.siteTypeId);
+            siteTypeName = siteType ? siteType.name : siteTypeName;
+          }
+          
+          return { 
+            ...client, 
+            ...regularClientData, 
+            siteTypeName,
+            updatedAt: new Date().toISOString() 
+          };
         }
         return client;
       })
@@ -215,7 +241,11 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({
     setClients((prev) => 
       prev.map((client) => {
         if (client.id === id) {
-          return { ...client, status: 'nao_fechou' as ClientStatus, updatedAt: new Date().toISOString() };
+          return { 
+            ...client, 
+            status: 'nao_fechou' as ClientStatus, 
+            updatedAt: new Date().toISOString() 
+          };
         }
         return client;
       })

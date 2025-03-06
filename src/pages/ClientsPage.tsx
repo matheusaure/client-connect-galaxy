@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useClientContext } from '@/context/ClientContext';
 import ClientForm from '@/components/ClientForm';
@@ -125,6 +126,32 @@ const ClientsPage = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  // Função auxiliar para obter o nome do tipo de site
+  const getSiteTypeName = (siteTypeId?: string) => {
+    if (!siteTypeId) return '';
+    const siteType = siteTypes.find(type => type.id === siteTypeId);
+    return siteType ? siteType.name : '';
+  };
+
+  // Renderiza um card de cliente com informações extras quando for um cliente fechado
+  const renderClientCard = (client: Client) => {
+    const isClosed = client.status === 'fechado';
+    const siteTypeName = getSiteTypeName(client.siteTypeId);
+    
+    return (
+      <ClientCard
+        key={client.id}
+        client={{
+          ...client,
+          siteTypeName: siteTypeName // Adicionando o nome do tipo de site para exibição
+        }}
+        onEdit={() => handleEditClient(client)}
+        onDelete={() => handleDeleteClient(client.id)}
+        onConvert={() => handleConvertClient(client.id)}
+      />
+    );
+  };
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -196,15 +223,7 @@ const ClientsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  onEdit={() => handleEditClient(client)}
-                  onDelete={() => handleDeleteClient(client.id)}
-                  onConvert={() => handleConvertClient(client.id)}
-                />
-              ))}
+              {filteredClients.map(renderClientCard)}
             </div>
           )}
         </TabsContent>
@@ -219,15 +238,7 @@ const ClientsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  onEdit={() => handleEditClient(client)}
-                  onDelete={() => handleDeleteClient(client.id)}
-                  onConvert={() => handleConvertClient(client.id)}
-                />
-              ))}
+              {filteredClients.map(renderClientCard)}
             </div>
           )}
         </TabsContent>
@@ -242,15 +253,7 @@ const ClientsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  onEdit={() => handleEditClient(client)}
-                  onDelete={() => handleDeleteClient(client.id)}
-                  onConvert={() => handleConvertClient(client.id)}
-                />
-              ))}
+              {filteredClients.map(renderClientCard)}
             </div>
           )}
         </TabsContent>
@@ -265,15 +268,7 @@ const ClientsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  onEdit={() => handleEditClient(client)}
-                  onDelete={() => handleDeleteClient(client.id)}
-                  onConvert={() => handleConvertClient(client.id)}
-                />
-              ))}
+              {filteredClients.map(renderClientCard)}
             </div>
           )}
         </TabsContent>
@@ -288,15 +283,7 @@ const ClientsPage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredClients.map((client) => (
-                <ClientCard
-                  key={client.id}
-                  client={client}
-                  onEdit={() => handleEditClient(client)}
-                  onDelete={() => handleDeleteClient(client.id)}
-                  onConvert={() => handleConvertClient(client.id)}
-                />
-              ))}
+              {filteredClients.map(renderClientCard)}
             </div>
           )}
         </TabsContent>

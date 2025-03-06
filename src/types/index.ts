@@ -9,7 +9,8 @@ export interface Client {
   city: string;
   contactDate: string;
   status: ClientStatus;
-  siteTypeId?: string; // Added siteTypeId as an optional field for all clients
+  siteTypeId?: string;
+  siteTypeName?: string; // Nome do tipo de site para exibição
   notes?: string;
   createdAt: string;
   updatedAt: string;
