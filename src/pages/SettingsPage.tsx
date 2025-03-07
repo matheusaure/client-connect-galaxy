@@ -14,6 +14,7 @@ interface UserData {
   email: string;
   name: string;
   companyName?: string;
+  companyNameColor?: string;
   logo?: string;
   primaryColor?: string;
   darkMode?: boolean;
@@ -22,6 +23,7 @@ interface UserData {
 export default function SettingsPage() {
   const [user, setUser] = useState<UserData | null>(null);
   const [companyName, setCompanyName] = useState('');
+  const [companyNameColor, setCompanyNameColor] = useState('#000000');
   const [primaryColor, setPrimaryColor] = useState('#00A3FF');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -46,6 +48,9 @@ export default function SettingsPage() {
       }
       if (userData.companyName) {
         setCompanyName(userData.companyName);
+      }
+      if (userData.companyNameColor) {
+        setCompanyNameColor(userData.companyNameColor);
       }
     } catch (error) {
       console.error('Error parsing user data:', error);
@@ -73,6 +78,7 @@ export default function SettingsPage() {
     const updatedUser = {
       ...user,
       companyName,
+      companyNameColor,
       primaryColor,
       logo: logoPreview || user.logo
     };
@@ -135,24 +141,48 @@ export default function SettingsPage() {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="primary-color">Cor Primária</Label>
-                <div className="flex items-center gap-4">
-                  <Input
-                    id="primary-color"
-                    type="color"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    type="text"
-                    value={primaryColor}
-                    onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-32"
-                  />
-                  <div className="border p-4 rounded-md" style={{ backgroundColor: primaryColor }}>
-                    Prévia
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="company-name-color">Cor do Nome da Empresa</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="company-name-color"
+                      type="color"
+                      value={companyNameColor}
+                      onChange={(e) => setCompanyNameColor(e.target.value)}
+                      className="w-16 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={companyNameColor}
+                      onChange={(e) => setCompanyNameColor(e.target.value)}
+                      className="w-32"
+                    />
+                    <div className="border p-4 rounded-md flex items-center justify-center" style={{ color: companyNameColor }}>
+                      <span className="font-bold">Prévia</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="primary-color">Cor do "CRM"</Label>
+                  <div className="flex items-center gap-4">
+                    <Input
+                      id="primary-color"
+                      type="color"
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      className="w-16 h-10"
+                    />
+                    <Input
+                      type="text"
+                      value={primaryColor}
+                      onChange={(e) => setPrimaryColor(e.target.value)}
+                      className="w-32"
+                    />
+                    <div className="border p-4 rounded-md flex items-center justify-center" style={{ color: primaryColor }}>
+                      <span className="font-bold">Prévia</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -167,21 +197,27 @@ export default function SettingsPage() {
                     onChange={handleLogoChange}
                   />
                   
-                  <div className="flex items-center gap-4">
-                    {logoPreview && (
-                      <div className="border rounded-md p-4 bg-white">
-                        <h3 className="mb-2 text-sm font-medium">Prévia:</h3>
+                  <div className="flex flex-col md:flex-row items-center gap-6 mt-4 p-4 border rounded-md">
+                    <div className="w-full md:w-1/2">
+                      <h3 className="mb-3 text-sm font-medium">Prévia da Logo:</h3>
+                      {logoPreview ? (
                         <img 
                           src={logoPreview} 
                           alt="Logo preview" 
-                          className="h-16 object-contain"
+                          className="h-20 object-contain mx-auto"
                         />
-                      </div>
-                    )}
+                      ) : (
+                        <div className="h-20 flex items-center justify-center text-muted-foreground">
+                          Nenhuma logo carregada
+                        </div>
+                      )}
+                    </div>
                     
-                    <div className="border rounded-md p-4">
-                      <h3 className="mb-2 text-sm font-medium">Prévia no sistema:</h3>
-                      <Logo size="medium" />
+                    <div className="w-full md:w-1/2">
+                      <h3 className="mb-3 text-sm font-medium">Prévia completa:</h3>
+                      <div className="flex justify-center">
+                        <Logo size="medium" />
+                      </div>
                     </div>
                   </div>
                 </div>
