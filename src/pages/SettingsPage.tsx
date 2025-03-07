@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,6 @@ export default function SettingsPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load user from localStorage
     const userStr = localStorage.getItem('currentUser');
     if (!userStr) {
       navigate('/login');
@@ -63,7 +61,6 @@ export default function SettingsPage() {
       const file = e.target.files[0];
       setLogoFile(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         setLogoPreview(reader.result as string);
@@ -83,13 +80,8 @@ export default function SettingsPage() {
       logo: logoPreview || user.logo
     };
 
-    // In a real app, you would upload the logo to a server
-    // For now, we'll just store it in localStorage
-
-    // Update localStorage
     localStorage.setItem('currentUser', JSON.stringify(updatedUser));
 
-    // Apply the color change by updating CSS variables
     document.documentElement.style.setProperty('--primary', colorToHsl(primaryColor));
 
     toast({
@@ -98,11 +90,8 @@ export default function SettingsPage() {
     });
   };
 
-  // Helper function to convert hex to HSL for CSS variables
   const colorToHsl = (hex: string): string => {
-    // This is a simplified conversion - in a real app you'd want a more accurate conversion
-    // For now, we'll just return a placeholder value
-    return "199 100% 50%"; // Default blue HSL
+    return "199 100% 50%";
   };
 
   const handleLogout = () => {
@@ -138,6 +127,7 @@ export default function SettingsPage() {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Digite o nome da sua empresa"
+                  className="font-medium text-lg"
                 />
               </div>
               
@@ -158,8 +148,8 @@ export default function SettingsPage() {
                       onChange={(e) => setCompanyNameColor(e.target.value)}
                       className="w-32"
                     />
-                    <div className="border p-4 rounded-md flex items-center justify-center" style={{ color: companyNameColor }}>
-                      <span className="font-bold">Prévia</span>
+                    <div className="border p-4 rounded-md flex items-center justify-center font-bold text-lg" style={{ color: companyNameColor }}>
+                      Exemplo
                     </div>
                   </div>
                 </div>
@@ -180,8 +170,8 @@ export default function SettingsPage() {
                       onChange={(e) => setPrimaryColor(e.target.value)}
                       className="w-32"
                     />
-                    <div className="border p-4 rounded-md flex items-center justify-center" style={{ color: primaryColor }}>
-                      <span className="font-bold">Prévia</span>
+                    <div className="border p-4 rounded-md flex items-center justify-center font-bold text-lg" style={{ color: primaryColor }}>
+                      Exemplo
                     </div>
                   </div>
                 </div>
@@ -197,7 +187,7 @@ export default function SettingsPage() {
                     onChange={handleLogoChange}
                   />
                   
-                  <div className="flex flex-col md:flex-row items-center gap-6 mt-4 p-4 border rounded-md">
+                  <div className="flex flex-col md:flex-row items-center gap-6 mt-4 p-6 border rounded-md bg-muted/30">
                     <div className="w-full md:w-1/2">
                       <h3 className="mb-3 text-sm font-medium">Prévia da Logo:</h3>
                       {logoPreview ? (
@@ -215,7 +205,7 @@ export default function SettingsPage() {
                     
                     <div className="w-full md:w-1/2">
                       <h3 className="mb-3 text-sm font-medium">Prévia completa:</h3>
-                      <div className="flex justify-center">
+                      <div className="flex justify-center p-4 bg-white rounded-lg shadow-sm">
                         <Logo size="medium" />
                       </div>
                     </div>

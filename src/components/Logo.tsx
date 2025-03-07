@@ -1,7 +1,7 @@
 
 import React from 'react';
 
-const Logo = ({ className = "", size = "small" | "medium" | "large" }: { className?: string, size?: "small" | "medium" | "large" }) => {
+const Logo = ({ className = "", size = "medium" }: { className?: string, size?: "small" | "medium" | "large" }) => {
   const sizeClasses = {
     small: "h-8",
     medium: "h-10",
@@ -46,8 +46,18 @@ const Logo = ({ className = "", size = "small" | "medium" | "large" }: { classNa
         className={`mb-2 ${sizeClasses[size]}`}
       />
       <div className={`font-bold ${textSizeClasses[size]} flex items-center`}>
-        <span style={{ color: companyNameColor }} className="font-extrabold tracking-tight mr-0.5">{companyName}</span>
-        <span style={{ color: primaryColor }} className="font-bold">CRM</span>
+        <span 
+          style={{ color: companyNameColor }} 
+          className="font-extrabold tracking-tight mr-1"
+        >
+          {companyName}
+        </span>
+        <span 
+          style={{ color: primaryColor }} 
+          className="font-bold"
+        >
+          CRM
+        </span>
       </div>
     </div>
   );
