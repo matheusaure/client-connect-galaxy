@@ -13,6 +13,7 @@ interface UserData {
   id: string;
   email: string;
   name: string;
+  companyName?: string;
   logo?: string;
   primaryColor?: string;
   darkMode?: boolean;
@@ -20,6 +21,7 @@ interface UserData {
 
 export default function SettingsPage() {
   const [user, setUser] = useState<UserData | null>(null);
+  const [companyName, setCompanyName] = useState('');
   const [primaryColor, setPrimaryColor] = useState('#00A3FF');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -41,6 +43,9 @@ export default function SettingsPage() {
       }
       if (userData.logo) {
         setLogoPreview(userData.logo);
+      }
+      if (userData.companyName) {
+        setCompanyName(userData.companyName);
       }
     } catch (error) {
       console.error('Error parsing user data:', error);
@@ -67,6 +72,7 @@ export default function SettingsPage() {
 
     const updatedUser = {
       ...user,
+      companyName,
       primaryColor,
       logo: logoPreview || user.logo
     };
@@ -115,10 +121,20 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle>Personalize seu CRM</CardTitle>
               <CardDescription>
-                Ajuste as cores e o logo do seu sistema.
+                Ajuste as cores, o logo e o nome da sua empresa.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="company-name">Nome da Empresa</Label>
+                <Input
+                  id="company-name"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  placeholder="Digite o nome da sua empresa"
+                />
+              </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="primary-color">Cor Primária</Label>
                 <div className="flex items-center gap-4">
