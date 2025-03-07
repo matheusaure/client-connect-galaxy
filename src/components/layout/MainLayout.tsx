@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -14,6 +13,8 @@ import {
 import Logo from '../Logo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -43,9 +44,25 @@ export default function MainLayout() {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      localStorage.removeItem('currentUser');
+      toast({
+        title: "Sucesso",
+        description: "Você saiu do sistema com sucesso."
+      });
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Erro ao sair:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao tentar sair. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   // Get primary color from localStorage if available

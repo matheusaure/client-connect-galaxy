@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/use-toast';
 import { useNavigate } from 'react-router-dom';
 import Logo from '@/components/Logo';
+import { supabase } from '@/integrations/supabase/client';
 
 interface UserData {
   id: string;
@@ -26,34 +27,41 @@ export default function SettingsPage() {
   const [primaryColor, setPrimaryColor] = useState('#00A3FF');
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
-      navigate('/login');
-      return;
-    }
+    const loadUserData = async () => {
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData.session) {
+        navigate('/login');
+        return;
+      }
 
-    try {
-      const userData = JSON.parse(userStr) as UserData;
-      setUser(userData);
-      if (userData.primaryColor) {
-        setPrimaryColor(userData.primaryColor);
+      const userFromStorage = localStorage.getItem('currentUser');
+      if (userFromStorage) {
+        try {
+          const userData = JSON.parse(userFromStorage) as UserData;
+          setUser(userData);
+          if (userData.primaryColor) {
+            setPrimaryColor(userData.primaryColor);
+          }
+          if (userData.logo) {
+            setLogoPreview(userData.logo);
+          }
+          if (userData.companyName) {
+            setCompanyName(userData.companyName);
+          }
+          if (userData.companyNameColor) {
+            setCompanyNameColor(userData.companyNameColor);
+          }
+        } catch (error) {
+          console.error('Erro ao analisar dados do usuário:', error);
+        }
       }
-      if (userData.logo) {
-        setLogoPreview(userData.logo);
-      }
-      if (userData.companyName) {
-        setCompanyName(userData.companyName);
-      }
-      if (userData.companyNameColor) {
-        setCompanyNameColor(userData.companyNameColor);
-      }
-    } catch (error) {
-      console.error('Error parsing user data:', error);
-      navigate('/login');
-    }
+    };
+
+    loadUserData();
   }, [navigate]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,34 +77,105 @@ export default function SettingsPage() {
     }
   };
 
-  const saveSettings = () => {
+  const saveSettings = async () => {
     if (!user) return;
+    setIsLoading(true);
 
-    const updatedUser = {
-      ...user,
-      companyName,
-      companyNameColor,
-      primaryColor,
-      logo: logoPreview || user.logo
-    };
+    try {
+      let logoUrl = user.logo;
 
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      // Upload da logo para o Supabase Storage, se houver um novo arquivo
+      if (logoFile) {
+        const fileName = `logos/${user.id}_${Date.now()}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('user-assets')
+          .upload(fileName, logoFile, {
+            upsert: true,
+            contentType: logoFile.type,
+          });
 
-    document.documentElement.style.setProperty('--primary', colorToHsl(primaryColor));
+        if (uploadError) {
+          throw new Error(`Erro ao fazer upload da imagem: ${uploadError.message}`);
+        }
 
-    toast({
-      title: "Configurações salvas",
-      description: "Suas configurações foram atualizadas com sucesso!"
-    });
+        if (uploadData) {
+          const { data: publicUrlData } = supabase.storage
+            .from('user-assets')
+            .getPublicUrl(fileName);
+          
+          logoUrl = publicUrlData.publicUrl;
+        }
+      }
+
+      // Atualizar o perfil no Supabase
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          company_name: companyName,
+          company_name_color: companyNameColor,
+          primary_color: primaryColor,
+          logo: logoUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
+      }
+
+      // Atualizar dados no localStorage
+      const updatedUser = {
+        ...user,
+        companyName,
+        companyNameColor,
+        primaryColor,
+        logo: logoUrl
+      };
+
+      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+
+      document.documentElement.style.setProperty('--primary', colorToHsl(primaryColor));
+
+      toast({
+        title: "Configurações salvas",
+        description: "Suas configurações foram atualizadas com sucesso!"
+      });
+    } catch (error: any) {
+      console.error('Erro ao salvar configurações:', error);
+      toast({
+        title: "Erro",
+        description: error.message || "Ocorreu um erro ao salvar as configurações.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const colorToHsl = (hex: string): string => {
     return "199 100% 50%";
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('currentUser');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      localStorage.removeItem('currentUser');
+      toast({
+        title: "Sucesso",
+        description: "Você saiu do sistema com sucesso."
+      });
+      navigate('/login');
+    } catch (error: any) {
+      console.error("Erro ao sair:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao tentar sair. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
 
   if (!user) return null;
@@ -214,7 +293,9 @@ export default function SettingsPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button onClick={saveSettings}>Salvar Alterações</Button>
+              <Button onClick={saveSettings} disabled={isLoading}>
+                {isLoading ? 'Salvando...' : 'Salvar Alterações'}
+              </Button>
             </CardFooter>
           </Card>
         </TabsContent>
