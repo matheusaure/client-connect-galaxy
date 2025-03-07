@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Users, 
   ClipboardCheck, 
   DollarSign, 
   Home, 
   Menu, 
-  X
+  X,
+  Settings,
+  LogOut
 } from 'lucide-react';
 import Logo from '../Logo';
 import { cn } from '@/lib/utils';
@@ -15,16 +17,52 @@ import { Button } from '@/components/ui/button';
 
 export default function MainLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [userName, setUserName] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  useEffect(() => {
+    const userStr = localStorage.getItem('currentUser');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserName(user.name || 'Usuário');
+      } catch (e) {
+        console.error("Error parsing user data:", e);
+      }
+    }
+  }, []);
   
   const navigation = [
     { name: 'Dashboard', href: '/', icon: Home },
     { name: 'Clientes', href: '/clientes', icon: Users },
     { name: 'Clientes Fechados', href: '/clientes-fechados', icon: ClipboardCheck },
     { name: 'Tipos de Sites', href: '/tipos-sites', icon: DollarSign },
+    { name: 'Configurações', href: '/configuracoes', icon: Settings },
   ];
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  const handleLogout = () => {
+    localStorage.removeItem('currentUser');
+    navigate('/login');
+  };
+
+  // Get primary color from localStorage if available
+  const getPrimaryColor = (): string => {
+    try {
+      const userStr = localStorage.getItem('currentUser');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        return user.primaryColor || "#00A3FF";
+      }
+    } catch (e) {
+      console.error("Error getting user primary color:", e);
+    }
+    return "#00A3FF";
+  };
+
+  const primaryColor = getPrimaryColor();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted">
@@ -58,27 +96,41 @@ export default function MainLayout() {
                 className={cn(
                   "flex items-center px-4 py-3 text-sm font-medium rounded-lg group transition-all duration-200",
                   location.pathname === item.href 
-                    ? "bg-brand-blue text-white" 
+                    ? `bg-[${primaryColor}] text-white` 
                     : "text-gray-300 hover:bg-white/10"
                 )}
+                style={location.pathname === item.href ? { backgroundColor: primaryColor } : {}}
               >
                 <item.icon 
                   className={cn(
                     "mr-3 h-5 w-5 transition-transform duration-200 group-hover:scale-110",
-                    location.pathname === item.href ? "text-white" : "text-brand-blue"
-                  )} 
-                />
+                    location.pathname === item.href ? "text-white" : `text-[${primaryColor}]`
+                  )}
+                  style={location.pathname !== item.href ? { color: primaryColor } : {}}
+                /> 
                 {item.name}
               </Link>
             ))}
           </nav>
           
-          <div className="py-6">
+          <div className="py-6 space-y-4">
             <div className="px-4 py-3 bg-white/5 rounded-lg">
               <p className="text-xs text-gray-400">
+                Olá, {userName}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
                 Gestão de clientes simplificada
               </p>
             </div>
+            
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start text-gray-300 hover:bg-white/10"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-3 h-5 w-5" style={{ color: primaryColor }} />
+              Sair
+            </Button>
           </div>
         </div>
       </div>
